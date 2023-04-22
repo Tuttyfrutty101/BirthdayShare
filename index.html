@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Birthday Lookup</title>
+</head>
+<body>
+	<h1>Birthday Lookup</h1>
+	<form id="birthdayForm">
+		<label for="birthday">Enter your birthday:</label>
+		<input type="date" id="birthday" name="birthday"><br><br>
+		<input type="submit" value="Submit">
+	</form>
+
+	<div id="results">
+		<!-- Results will be displayed here -->
+	</div>
+
+	<script>
+		// Load dotenv library to read .env file
+		// Make sure to add the dotenv library to your project
+		// and import it in your HTML file before using it
+		dotenv.config();
+
+		// Get the API key from the .env file
+		const API_KEY = process.env.API_KEY;
+
+		// When the form is submitted, handle the form data
+		document.getElementById("birthdayForm").addEventListener("submit", function(event) {
+			event.preventDefault(); // Prevent the form from submitting
+
+			// Get the date input from the form and format it
+			const birthday = document.getElementById("birthday").value;
+			const formattedBirthday = birthday.slice(5) + '-' + birthday.slice(0,4);
+
+			// Use the formatted date as the API request parameter
+			const url = `https://api.famousbirthdays.com/v2/date/${formattedBirthday}?page=1&api_key=${API_KEY}`;
+
+			// Make the API request
+			fetch(url)
+				.then(response => response.json())
+				.then(data => {
+					// Display the results in the "results" div
+					const resultsDiv = document.getElementById("results");
+					resultsDiv.innerHTML = "";
+
+					if (data.data.length > 0) {
+						data.data.forEach(person => {
+							const personDiv = document.createElement("div");
+							const personName = document.createElement("h3");
+							const personDescription = document.createElement("p");
+
+							personName.innerText = person.name;
+							personDescription.innerText = person.description;
+
+							personDiv.appendChild(personName);
+							personDiv.appendChild(personDescription);
+							resultsDiv.appendChild(personDiv);
+						});
+					} else {
+						resultsDiv.innerText = "No famous people found with that birthday.";
+					}
+				})
+				.catch(error => console.log(error));
+		});
+	</script>
+</body>
+</html>
